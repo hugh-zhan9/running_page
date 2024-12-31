@@ -52,15 +52,17 @@ const IS_CHINESE = true;
 const USE_ANIMATION_FOR_GRID = false;
 const CHINESE_INFO_MESSAGE = (yearLength: number, year: string): string => {
   const yearStr = year === 'Total' ? '所有' : ` ${year} `;
-  return `我记录自己跑步 ${yearLength} 年了，下面列表展示的是${yearStr}的数据` + `\n\n\n\n` +
-  
-  
-`明明这么痛苦，这么难过，为什么就是不能放弃跑步？因为全身细胞都在蠢蠢欲动，想要感受强风迎面吹拂的滋味。"`
-
-
-                                                         +`\n`+ `                   ––《强风吹拂》  
-  `;
+  return `我记录自己跑步 ${yearLength} 年了，下面列表展示的是${yearStr}的数据.`
 };
+
+const CHINESE_INFO_MESSAGE_EXT = (): string => {
+  return `明明这么痛苦，这么难过，为什么就是不能放弃跑步？因为全身细胞都在蠢蠢欲动，想要感受强风迎面吹拂的滋味。`
+};
+
+const CHINESE_INFO_MESSAGE_BLANK = (): string => {
+  return ``
+};
+
 const ENGLISH_INFO_MESSAGE = (yearLength: number, year: string): string =>
   `Running Journey with ${yearLength} Years, the table shows year ${year} data`;
 
@@ -70,6 +72,8 @@ const CHINESE_LOCATION_INFO_MESSAGE_FIRST =
 const CHINESE_LOCATION_INFO_MESSAGE_SECOND = '不要停下来，不要停下奔跑的脚步';
 
 const INFO_MESSAGE = IS_CHINESE ? CHINESE_INFO_MESSAGE : ENGLISH_INFO_MESSAGE;
+const BLANK_LINE = IS_CHINESE ? CHINESE_INFO_MESSAGE_BLANK : '';
+const INFO_MESSAGE_EXT = IS_CHINESE ? CHINESE_INFO_MESSAGE_EXT : '';
 const FULL_MARATHON_RUN_TITLE = IS_CHINESE ? '全程马拉松' : 'Full Marathon';
 const HALF_MARATHON_RUN_TITLE = IS_CHINESE ? '半程马拉松' : 'Half Marathon';
 const MORNING_RUN_TITLE = IS_CHINESE ? '清晨跑步' : 'Morning Run';
