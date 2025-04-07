@@ -11,8 +11,8 @@ interface ISiteMetadataResult {
 
 const data: ISiteMetadataResult = {
   siteTitle: 'Running Page',
-  siteUrl: 'https://yihong.run',
-  logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTtc69JxHNcmN1ETpMUX4dozAgAN6iPjWalQ&usqp=CAU',
+  siteUrl: 'https://hugh-zhan9.github.io/running_page',
+  logo: 'https://cdn.v2ex.com/avatar/1872/c12d/546693_xlarge.png?m=1730771302',
   description: 'Personal site and blog',
   navLinks: [
     {
@@ -21,12 +21,12 @@ const data: ISiteMetadataResult = {
     },
     {
       name: 'Blog',
-      url: 'https://github.com/yihong0618/gitblog',
+      url: 'https://hugh-zhan9.github.io',
     },
-    {
-      name: 'About',
-      url: 'https://github.com/yihong0618/running_page/blob/master/README-CN.md',
-    },
+    // {
+    //   name: 'About',
+    //   url: 'https://github.com/yihong0618/running_page/blob/master/README-CN.md',
+    // },
   ],
 };
 
