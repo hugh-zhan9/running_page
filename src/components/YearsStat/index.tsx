@@ -1,8 +1,6 @@
 import YearStat from '@/components/YearStat';
 import useActivities from '@/hooks/useActivities';
 import { INFO_MESSAGE } from '@/utils/const';
-import { INFO_MESSAGE_EXT } from '@/utils/const';
-import { BLANK_LINE } from '@/utils/const';
 
 const YearsStat = ({ year, onClick }: { year: string, onClick: (_year: string) => void }) => {
   const { years } = useActivities();
@@ -18,14 +16,6 @@ const YearsStat = ({ year, onClick }: { year: string, onClick: (_year: string) =
       <section className="pb-0">
         <p className="leading-relaxed">
           {INFO_MESSAGE(years.length, year)}
-          <br />
-        </p>
-        <p className="leading-relaxed">
-          {BLANK_LINE()}
-          <br />
-        </p>
-        <p className="leading-relaxed">
-          {INFO_MESSAGE_EXT()}
           <br />
         </p>
       </section>

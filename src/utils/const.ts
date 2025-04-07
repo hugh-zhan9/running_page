@@ -33,9 +33,9 @@ const GOOGLE_ANALYTICS_TRACKING_ID = '';
 // styling: set to `true` if you want dash-line route
 const USE_DASH_LINE = true;
 // styling: route line opacity: [0, 1]
-const LINE_OPACITY = 0.5;
+const LINE_OPACITY = 0.4;
 // styling: map height
-const MAP_HEIGHT = 500;
+const MAP_HEIGHT = 600;
 //set to `false` if you want to hide the road label characters
 const ROAD_LABEL_DISPLAY = true;
 // update for now 2024/11/17 the privacy mode is true
@@ -43,7 +43,7 @@ const ROAD_LABEL_DISPLAY = true;
 const PRIVACY_MODE = false;
 // update for now 2024/11/17 the lights on default is false
 //set to `false` if you want to make light off as default, only effect when `PRIVACY_MODE` = false
-const LIGHTS_ON =true;
+const LIGHTS_ON =false;
 // richer title for the activity types (like garmin style)
 const RICH_TITLE = false;
 
@@ -52,17 +52,8 @@ const IS_CHINESE = true;
 const USE_ANIMATION_FOR_GRID = false;
 const CHINESE_INFO_MESSAGE = (yearLength: number, year: string): string => {
   const yearStr = year === 'Total' ? '所有' : ` ${year} `;
-  return `我记录自己跑步 ${yearLength} 年了，下面展示的是${yearStr}的数据.`
+  return `我用 App 记录自己跑步 ${yearLength} 年了，下面列表展示的是${yearStr}的数据`;
 };
-
-const CHINESE_INFO_MESSAGE_EXT = (): string => {
-  return `明明这么痛苦，这么难过，为什么就是不能放弃跑步？因为全身细胞都在蠢蠢欲动，想要感受强风迎面吹拂的滋味。`
-};
-
-const CHINESE_INFO_MESSAGE_BLANK = (): string => {
-  return ``
-};
-
 const ENGLISH_INFO_MESSAGE = (yearLength: number, year: string): string =>
   `Running Journey with ${yearLength} Years, the table shows year ${year} data`;
 
@@ -72,8 +63,6 @@ const CHINESE_LOCATION_INFO_MESSAGE_FIRST =
 const CHINESE_LOCATION_INFO_MESSAGE_SECOND = '不要停下来，不要停下奔跑的脚步';
 
 const INFO_MESSAGE = IS_CHINESE ? CHINESE_INFO_MESSAGE : ENGLISH_INFO_MESSAGE;
-const BLANK_LINE = IS_CHINESE ? CHINESE_INFO_MESSAGE_BLANK : '';
-const INFO_MESSAGE_EXT = IS_CHINESE ? CHINESE_INFO_MESSAGE_EXT : '';
 const FULL_MARATHON_RUN_TITLE = IS_CHINESE ? '全程马拉松' : 'Full Marathon';
 const HALF_MARATHON_RUN_TITLE = IS_CHINESE ? '半程马拉松' : 'Half Marathon';
 const MORNING_RUN_TITLE = IS_CHINESE ? '清晨跑步' : 'Morning Run';
@@ -120,8 +109,6 @@ export {
   IS_CHINESE,
   ROAD_LABEL_DISPLAY,
   INFO_MESSAGE,
-  INFO_MESSAGE_EXT,
-  BLANK_LINE,
   RUN_TITLES,
   USE_ANIMATION_FOR_GRID,
   USE_DASH_LINE,
