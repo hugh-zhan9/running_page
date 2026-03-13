@@ -27,6 +27,7 @@ import { SHOW_ELEVATION_GAIN, HOME_PAGE_TITLE } from '@/utils/const';
 import { DIST_UNIT, M_TO_DIST } from '@/utils/utils';
 import RoutePreview from '@/components/RoutePreview';
 import { Activity } from '@/utils/utils';
+import { normalizeActivityType } from '@/utils/activity';
 // Layout constants (avoid magic numbers)
 const ITEM_WIDTH = 280;
 const ITEM_GAP = 20;
@@ -390,19 +391,11 @@ const ActivityList: React.FC = () => {
   }, [interval, selectedYear, availableYears]);
 
   useEffect(() => {
-    const sportTypeSet = new Set(activities.map((activity) => activity.type));
-    if (sportTypeSet.has('Run')) {
-      sportTypeSet.delete('Run');
-      sportTypeSet.add('running');
-    }
-    if (sportTypeSet.has('Walk')) {
-      sportTypeSet.delete('Walk');
-      sportTypeSet.add('walking');
-    }
-    if (sportTypeSet.has('Ride')) {
-      sportTypeSet.delete('Ride');
-      sportTypeSet.add('cycling');
-    }
+    const sportTypeSet = new Set(
+      (activities as Activity[]).map((activity) =>
+        normalizeActivityType(activity.type)
+      )
+    );
     const uniqueSportTypes = [...sportTypeSet];
     uniqueSportTypes.unshift('all');
     setSportTypeOptions(uniqueSportTypes);
@@ -437,13 +430,7 @@ const ActivityList: React.FC = () => {
     return (activities as Activity[])
       .filter((activity) => {
         if (sportTypeArg === 'all') return true;
-        if (sportTypeArg === 'running')
-          return activity.type === 'running' || activity.type === 'Run';
-        if (sportTypeArg === 'walking')
-          return activity.type === 'walking' || activity.type === 'Walk';
-        if (sportTypeArg === 'cycling')
-          return activity.type === 'cycling' || activity.type === 'Ride';
-        return activity.type === sportTypeArg;
+        return normalizeActivityType(activity.type) === sportTypeArg;
       })
       .reduce((acc: ActivityGroups, activity) => {
         const date = new Date(activity.start_date_local);
@@ -751,9 +738,7 @@ const ActivityList: React.FC = () => {
             ) : (
               // Show Life SVG when no year is selected
               <>
-                {(sportType === 'running' || sportType === 'Run') && (
-                  <RunningSvg />
-                )}
+                {sportType === 'running' && <RunningSvg />}
                 {sportType === 'walking' && <WalkingSvg />}
                 {sportType === 'hiking' && <HikingSvg />}
                 {sportType === 'cycling' && <CyclingSvg />}

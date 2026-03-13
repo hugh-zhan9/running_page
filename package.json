@@ -15,6 +15,7 @@
     "gcoord": "^0.3.2",
     "geojson": "^0.5.0",
     "mapbox-gl": "^2.15.0",
+    "maplibre-gl": "^4.7.1",
     "prop-types": "^15.8.1",
     "rc-virtual-list": "^3.19.2",
     "react": "^18.2.0",
@@ -42,6 +43,7 @@
     "lint": "eslint src --ext .ts,.tsx --fix",
     "check": "prettier --check \"src/main.tsx\" \"src/**/*.{css,module.css,json,ts,tsx}\" \"*.{yaml,json,ts}\"",
     "format": "prettier --write \"src/main.tsx\" \"src/**/*.{css,module.css,json,ts,tsx}\" \"*.{yaml,json,ts}\"",
+    "test": "node --import tsx --test src/**/*.test.ts",
     "ci": "pnpm run format && pnpm run lint && pnpm run build"
   },
   "engineStrict": true,
@@ -74,6 +76,7 @@
     "prettier": "^3.2.5",
     "prettier-plugin-tailwindcss": "^0.5.13",
     "tailwindcss": "^4.1.10",
+    "tsx": "^4.20.5",
     "typescript": "^5.2.2"
   },
   "pnpm": {

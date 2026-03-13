@@ -1,4 +1,3 @@
-import MapboxLanguage from '@mapbox/mapbox-gl-language';
 import React, {
   useRef,
   useCallback,
@@ -12,7 +11,7 @@ import Map, {
   FullscreenControl,
   NavigationControl,
   MapRef,
-} from 'react-map-gl';
+} from 'react-map-gl/maplibre';
 import { MapInstance } from 'react-map-gl/src/types/lib';
 import useActivities from '@/hooks/useActivities';
 import {
@@ -37,13 +36,14 @@ import {
   getMapStyle,
   isTouchDevice,
 } from '@/utils/utils';
+import { getMapRuntimeConfig } from '@/utils/map';
 import { RouteAnimator } from '@/utils/routeAnimation';
 import RunMarker from './RunMarker';
 import RunMapButtons from './RunMapButtons';
 import styles from './style.module.css';
 import { FeatureCollection } from 'geojson';
 import { RPGeometry } from '@/static/run_countries';
-import './mapbox.css';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import LightsControl from '@/components/RunMap/LightsControl';
 import { useMapTheme, useThemeChangeCounter } from '@/hooks/useTheme';
 
@@ -93,11 +93,15 @@ const RunMap = ({
     [currentMapTheme]
   );
 
-  // Mapbox GL JS requires a token even when using other vendors
-  // Always use the MAPBOX_TOKEN from const.ts (user may have set their own token)
-  const mapboxAccessToken = useMemo(() => {
-    return MAPBOX_TOKEN;
-  }, []);
+  const mapRuntimeConfig = useMemo(
+    () =>
+      getMapRuntimeConfig({
+        vendor: MAP_TILE_VENDOR,
+        styleUrl: mapStyle,
+        mapboxToken: MAPBOX_TOKEN,
+      }),
+    [mapStyle]
+  );
 
   // Update map when theme changes
   useEffect(() => {
@@ -240,9 +244,6 @@ const RunMap = ({
     (ref: MapRef) => {
       if (ref !== null) {
         const map = ref.getMap();
-        if (map && IS_CHINESE) {
-          map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }));
-        }
         // all style resources have been downloaded
         // and the first visually complete rendering of the base style has occurred.
         // it's odd. when use style other than mapbox, the style.load event is not triggered.Add commentMore actions
@@ -425,10 +426,10 @@ const RunMap = ({
       onMove={onMove}
       onClick={handleMapClick}
       style={style}
-      mapStyle={mapStyle}
+      mapStyle={mapRuntimeConfig.mapStyle}
       ref={mapRefCallback}
       cooperativeGestures={isTouchDevice()}
-      mapboxAccessToken={mapboxAccessToken}
+      mapboxAccessToken={mapRuntimeConfig.mapboxAccessToken}
     >
       {mapError && (
         <div className={styles.mapErrorNotification}>
