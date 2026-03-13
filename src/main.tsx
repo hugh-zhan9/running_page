@@ -12,6 +12,7 @@ import {
 import '@/styles/index.css';
 import { withOptionalGAPageTracking } from './utils/trackRoute';
 import HomePage from '@/pages/total';
+import { ActivitiesProvider } from '@/contexts/ActivitiesContext';
 
 if (USE_GOOGLE_ANALYTICS) {
   ReactGA.initialize(GOOGLE_ANALYTICS_TRACKING_ID);
@@ -38,7 +39,9 @@ const routes = createBrowserRouter(
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HelmetProvider>
-      <RouterProvider router={routes} />
+      <ActivitiesProvider>
+        <RouterProvider router={routes} />
+      </ActivitiesProvider>
     </HelmetProvider>
   </React.StrictMode>
 );

@@ -51,3 +51,58 @@ Changed Files:
 - `src/utils/const.ts`
 - `docs/AI_CHANGELOG.md`
 ----------------------------------------
+## [2026-03-13 16:51] [Feature]
+- **Change**: 新增统一活动类型筛选层，首页与汇总页共享同一份活动过滤结果
+- **Risk Analysis**: 主要风险在于筛选状态改为全局共享后，会影响首页地图、统计和 summary 页面原有默认口径；已通过测试、格式检查和构建验证基础回归，但未做浏览器端交互截图回归。
+- **Risk Level**: S2（中级: 局部功能异常、可绕过但影响效率）
+- **Changed Files**:
+- `src/utils/activity.ts`
+- `src/utils/activity.test.ts`
+- `src/hooks/useActivities.ts`
+- `src/contexts/ActivitiesContext.tsx`
+- `src/components/ActivityTypeFilter/index.tsx`
+- `src/components/ActivityTypeFilter/style.module.css`
+- `src/components/ActivityList/index.tsx`
+- `src/pages/index.tsx`
+- `src/main.tsx`
+----------------------------------------
+## [2026-03-13 17:02] [Bugfix]
+- **Change**: 优化活动类型筛选交互，固定跑步主类型并减少筛选切换时地图闪动
+- **Risk Analysis**: 主要风险在于活动筛选状态被强制包含跑步后，会影响用户之前保存在 localStorage 的选择；此外跳过筛选切换动画后，地图反馈更稳但少了原来的轨迹重播效果。已通过测试、格式检查和构建验证。
+- **Risk Level**: S2（中级: 局部功能异常、可绕过但影响效率）
+- **Changed Files**:
+- `src/utils/activity.ts`
+- `src/utils/activity.test.ts`
+- `src/contexts/ActivitiesContext.tsx`
+- `src/components/ActivityTypeFilter/index.tsx`
+- `src/components/ActivityTypeFilter/style.module.css`
+- `src/pages/index.tsx`
+----------------------------------------
+## [2026-03-13 17:29] [Bugfix]
+- **Change**: 修复切换年份到 Total 时地图视口未回到当前范围的问题
+- **Risk Analysis**: 主要风险在于自动 fit bounds 现在由 scope 变化驱动，可能影响城市、标题和类型筛选切换时的地图位置；已通过单元测试、格式检查、构建和浏览器手工路径验证。
+- **Risk Level**: S2（中级: 局部功能异常、可绕过但影响效率）
+- **Changed Files**:
+- `src/utils/map.ts`
+- `src/utils/map.test.ts`
+- `src/pages/index.tsx`
+----------------------------------------
+## [2026-03-13 17:45] [Bugfix]
+- **Change**: 修复年份切换后地图仍沿用首条轨迹缩放的问题，改为按当前范围内全部轨迹坐标计算视口
+- **Risk Analysis**: 新逻辑会影响所有依赖自动缩放的场景，包括年份切换、总览视图和多条轨迹定位；单条轨迹和无轨迹数据的默认视口已保留，但仍需在真实浏览器中继续观察大范围数据的缩放体感。
+- **Risk Level**: S2（中级: 局部功能异常、可绕过但影响效率）
+- **Changed Files**:
+- `src/utils/map.ts`
+- `src/utils/map.test.ts`
+- `src/pages/index.tsx`
+----------------------------------------
+## [2026-03-13 17:58] [Bugfix]
+- **Change**: 补齐 Hiking 和 VirtualRun 的活动类型归一化，并让地图初始化优先聚焦主要活动簇，避免被少量远端城市数据拉歪缩放
+- **Risk Analysis**: VirtualRun 现在会并入 running，可能改变跑步总数和汇总口径；主簇视口策略依赖活动簇数量和比例阈值，极少量跨城数据会被初始视图弱化，但单条轨迹定位和手动缩放不受影响。
+- **Risk Level**: S2（中级: 局部功能异常、可绕过但影响效率）
+- **Changed Files**:
+- `src/utils/activity.ts`
+- `src/utils/activity.test.ts`
+- `src/utils/map.ts`
+- `src/utils/map.test.ts`
+----------------------------------------

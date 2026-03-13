@@ -18,7 +18,6 @@ import {
 } from 'recharts';
 import VirtualList from 'rc-virtual-list';
 import { useNavigate } from 'react-router-dom';
-import activities from '@/data/activities';
 import styles from './style.module.css';
 import { ACTIVITY_TOTAL, LOADING_TEXT } from '@/utils/const';
 import { totalStat, yearSummaryStats } from '@assets/index';
@@ -27,7 +26,8 @@ import { SHOW_ELEVATION_GAIN, HOME_PAGE_TITLE } from '@/utils/const';
 import { DIST_UNIT, M_TO_DIST } from '@/utils/utils';
 import RoutePreview from '@/components/RoutePreview';
 import { Activity } from '@/utils/utils';
-import { normalizeActivityType } from '@/utils/activity';
+import useActivities from '@/hooks/useActivities';
+import ActivityTypeFilter from '@/components/ActivityTypeFilter';
 // Layout constants (avoid magic numbers)
 const ITEM_WIDTH = 280;
 const ITEM_GAP = 20;
@@ -330,9 +330,9 @@ const ActivityCard = React.memo(ActivityCardInner, activityCardAreEqual);
 
 const ActivityList: React.FC = () => {
   const [interval, setInterval] = useState<IntervalType>('month');
-  const [sportType, setSportType] = useState<string>('all');
-  const [sportTypeOptions, setSportTypeOptions] = useState<string[]>([]);
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
+  const { activities, selectedTypes } = useActivities();
+  const lifeSportType = selectedTypes.length === 1 ? selectedTypes[0] : 'all';
 
   // Get available years from activities
   const availableYears = useMemo(() => {
@@ -390,24 +390,6 @@ const ActivityList: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [interval, selectedYear, availableYears]);
 
-  useEffect(() => {
-    const sportTypeSet = new Set(
-      (activities as Activity[]).map((activity) =>
-        normalizeActivityType(activity.type)
-      )
-    );
-    const uniqueSportTypes = [...sportTypeSet];
-    uniqueSportTypes.unshift('all');
-    setSportTypeOptions(uniqueSportTypes);
-  }, []);
-
-  // 添加useEffect监听interval变化
-  useEffect(() => {
-    if (interval === 'life' && sportType !== 'all') {
-      setSportType('all');
-    }
-  }, [interval, sportType]);
-
   const navigate = useNavigate();
 
   const handleHomeClick = () => {
@@ -423,16 +405,9 @@ const ActivityList: React.FC = () => {
     return hours * 3600 + minutes * 60 + seconds;
   }
 
-  function groupActivitiesFn(
-    intervalArg: IntervalType,
-    sportTypeArg: string
-  ): ActivityGroups {
-    return (activities as Activity[])
-      .filter((activity) => {
-        if (sportTypeArg === 'all') return true;
-        return normalizeActivityType(activity.type) === sportTypeArg;
-      })
-      .reduce((acc: ActivityGroups, activity) => {
+  function groupActivitiesFn(intervalArg: IntervalType): ActivityGroups {
+    return (activities as Activity[]).reduce(
+      (acc: ActivityGroups, activity) => {
         const date = new Date(activity.start_date_local);
         let key: string;
         let index: number;
@@ -507,12 +482,14 @@ const ActivityList: React.FC = () => {
           acc[key].location = activity.location_country || '';
 
         return acc;
-      }, {} as ActivityGroups);
+      },
+      {} as ActivityGroups
+    );
   }
 
   const activitiesByInterval = useMemo(
-    () => groupActivitiesFn(interval, sportType),
-    [interval, sportType]
+    () => groupActivitiesFn(interval),
+    [interval, activities]
   );
 
   const dataList = useMemo(
@@ -594,7 +571,7 @@ const ActivityList: React.FC = () => {
       cancelAnimationFrame(id);
       clearTimeout(t);
     };
-  }, [interval, sportType]);
+  }, [interval, selectedTypes]);
 
   // compute list height = viewport height - filter container height
   useEffect(() => {
@@ -686,20 +663,7 @@ const ActivityList: React.FC = () => {
         <button className={styles.smallHomeButton} onClick={handleHomeClick}>
           {HOME_PAGE_TITLE}
         </button>
-        <select
-          onChange={(e) => setSportType(e.target.value)}
-          value={sportType}
-        >
-          {sportTypeOptions.map((type) => (
-            <option
-              key={type}
-              value={type}
-              disabled={interval === 'life' && type !== 'all'}
-            >
-              {type}
-            </option>
-          ))}
-        </select>
+        <ActivityTypeFilter />
         <select
           onChange={(e) => toggleInterval(e.target.value as IntervalType)}
           value={interval}
@@ -738,13 +702,13 @@ const ActivityList: React.FC = () => {
             ) : (
               // Show Life SVG when no year is selected
               <>
-                {sportType === 'running' && <RunningSvg />}
-                {sportType === 'walking' && <WalkingSvg />}
-                {sportType === 'hiking' && <HikingSvg />}
-                {sportType === 'cycling' && <CyclingSvg />}
-                {sportType === 'swimming' && <SwimmingSvg />}
-                {sportType === 'skiing' && <SkiingSvg />}
-                {sportType === 'all' && <AllSvg />}
+                {lifeSportType === 'running' && <RunningSvg />}
+                {lifeSportType === 'walking' && <WalkingSvg />}
+                {lifeSportType === 'hiking' && <HikingSvg />}
+                {lifeSportType === 'cycling' && <CyclingSvg />}
+                {lifeSportType === 'swimming' && <SwimmingSvg />}
+                {lifeSportType === 'skiing' && <SkiingSvg />}
+                {lifeSportType === 'all' && <AllSvg />}
               </>
             )}
           </Suspense>
@@ -822,7 +786,7 @@ const ActivityList: React.FC = () => {
                 </div>
               ) : (
                 <VirtualList
-                  key={`${sportType}-${interval}-${itemsPerRow}`}
+                  key={`${selectedTypes.join('-')}-${interval}-${itemsPerRow}`}
                   data={calcGroup}
                   height={listHeight}
                   itemHeight={rowHeight}

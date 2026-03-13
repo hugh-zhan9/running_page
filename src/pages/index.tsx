@@ -7,6 +7,7 @@ import RunMap from '@/components/RunMap';
 import RunTable from '@/components/RunTable';
 import SVGStat from '@/components/SVGStat';
 import YearsStat from '@/components/YearsStat';
+import ActivityTypeFilter from '@/components/ActivityTypeFilter';
 import useActivities from '@/hooks/useActivities';
 import useSiteMetadata from '@/hooks/useSiteMetadata';
 import { useInterval } from '@/hooks/useInterval';
@@ -19,17 +20,22 @@ import {
   filterTitleRuns,
   filterYearRuns,
   geoJsonForRuns,
-  getBoundsForGeoData,
   scrollToMap,
   sortDateFunc,
   titleForShow,
   RunIds,
 } from '@/utils/utils';
 import { useTheme, useThemeChangeCounter } from '@/hooks/useTheme';
+import { shouldReplayMapAnimation } from '@/utils/activity';
+import {
+  getViewportForGeoData,
+  shouldApplyPendingAutoFit,
+  shouldAutoFitToBounds,
+} from '@/utils/map';
 
 const Index = () => {
   const { siteTitle, siteUrl } = useSiteMetadata();
-  const { activities, thisYear } = useActivities();
+  const { activities, selectedTypes, thisYear } = useActivities();
   const themeChangeCounter = useThemeChangeCounter();
   const [year, setYear] = useState(thisYear);
   const [runIndex, setRunIndex] = useState(-1);
@@ -40,8 +46,9 @@ const Index = () => {
   const [animationRuns, setAnimationRuns] = useState<Activity[]>([]);
   const [currentFilter, setCurrentFilter] = useState<{
     item: string;
+    scope: string;
     func: (_run: Activity, _value: string) => boolean;
-  }>({ item: thisYear, func: filterYearRuns });
+  }>({ item: thisYear, scope: `Year:${thisYear}`, func: filterYearRuns });
 
   // State to track if we're showing a single run from URL hash
   const [singleRunId, setSingleRunId] = useState<number | null>(null);
@@ -51,6 +58,13 @@ const Index = () => {
 
   const selectedRunIdRef = useRef<number | null>(null);
   const selectedRunDateRef = useRef<string | null>(null);
+  const previousSelectedTypesKeyRef = useRef(selectedTypes.join('-'));
+  const previousScopeKeyRef = useRef(
+    `Year:${thisYear}|${selectedTypes.join('-')}`
+  );
+  const [pendingAutoFitScopeKey, setPendingAutoFitScopeKey] = useState<
+    string | null
+  >(null);
 
   // Parse URL hash on mount to check for run ID
   useEffect(() => {
@@ -99,7 +113,7 @@ const Index = () => {
 
   // for auto zoom
   const bounds = useMemo(() => {
-    return getBoundsForGeoData(geoData);
+    return getViewportForGeoData(geoData);
   }, [geoData]);
 
   const [viewState, setViewState] = useState<IViewState>(() => ({
@@ -160,7 +174,7 @@ const Index = () => {
       if (name != 'Year') {
         setYear(thisYear);
       }
-      setCurrentFilter({ item, func });
+      setCurrentFilter({ item, scope: `${name}:${item}`, func });
       setRunIndex(-1);
       setTitle(`${item} ${name} Running Heatmap`);
       // Reset single run state when changing filters
@@ -174,20 +188,11 @@ const Index = () => {
 
   const changeYear = useCallback(
     (y: string) => {
-      // default year
       setYear(y);
-
-      if ((viewState.zoom ?? 0) > 3 && bounds) {
-        setViewState({
-          ...bounds,
-        });
-      }
-
       changeByItem(y, 'Year', filterYearRuns);
-      // Stop current animation
       setIsAnimating(false);
     },
-    [viewState.zoom, bounds, changeByItem]
+    [changeByItem]
   );
 
   const changeCity = useCallback(
@@ -256,7 +261,7 @@ const Index = () => {
 
       // Create geoData for selected runs and calculate new bounds
       const selectedGeoData = geoJsonForRuns(selectedRuns);
-      const selectedBounds = getBoundsForGeoData(selectedGeoData);
+      const selectedBounds = getViewportForGeoData(selectedGeoData);
 
       // Stop any existing animation
       setIsAnimating(false);
@@ -288,7 +293,11 @@ const Index = () => {
         const runYear = targetRun.start_date_local.slice(0, 4);
         if (year !== runYear) {
           setYear(runYear);
-          setCurrentFilter({ item: runYear, func: filterYearRuns });
+          setCurrentFilter({
+            item: runYear,
+            scope: `Year:${runYear}`,
+            func: filterYearRuns,
+          });
         }
       } else {
         // If run doesn't exist, clear the hash and show a warning
@@ -310,22 +319,62 @@ const Index = () => {
     }
   }, [runs, singleRunId, locateActivity]);
 
-  // Update bounds when geoData changes
+  // Auto-fit to the full dataset of the current scope when scope changes.
   useEffect(() => {
-    if (singleRunId === null) {
-      setViewState((prev) => ({
-        ...prev,
-        ...bounds,
-      }));
+    const scopeKey = `${currentFilter.scope}|${selectedTypes.join('-')}`;
+    const shouldAutoFit = shouldAutoFitToBounds({
+      previousScopeKey: previousScopeKeyRef.current,
+      nextScopeKey: scopeKey,
+      singleRunId,
+    });
+
+    previousScopeKeyRef.current = scopeKey;
+
+    if (shouldAutoFit) {
+      setPendingAutoFitScopeKey(scopeKey);
     }
-  }, [bounds, singleRunId]);
+  }, [currentFilter.scope, selectedTypes, singleRunId]);
+
+  useEffect(() => {
+    const scopeKey = `${currentFilter.scope}|${selectedTypes.join('-')}`;
+    if (
+      shouldApplyPendingAutoFit({
+        pendingScopeKey: pendingAutoFitScopeKey,
+        currentScopeKey: scopeKey,
+        singleRunId,
+      })
+    ) {
+      setViewState(bounds);
+      setPendingAutoFitScopeKey(null);
+    }
+  }, [
+    bounds,
+    currentFilter.scope,
+    pendingAutoFitScopeKey,
+    selectedTypes,
+    singleRunId,
+  ]);
 
   // Animate geoData when runs change
   useEffect(() => {
     if (singleRunId === null) {
-      startAnimation(runs);
+      const selectedTypesKey = selectedTypes.join('-');
+      const shouldReplayAnimation = shouldReplayMapAnimation({
+        previousSelectedTypesKey: previousSelectedTypesKeyRef.current,
+        nextSelectedTypesKey: selectedTypesKey,
+        isSingleRunMode: singleRunId !== null,
+      });
+
+      previousSelectedTypesKeyRef.current = selectedTypesKey;
+
+      if (shouldReplayAnimation) {
+        startAnimation(runs);
+      } else {
+        setIsAnimating(false);
+        setAnimatedGeoData(geoData);
+      }
     }
-  }, [runs, startAnimation, singleRunId]);
+  }, [geoData, runs, selectedTypes, singleRunId, startAnimation]);
 
   useEffect(() => {
     if (year !== 'Total') {
@@ -408,6 +457,7 @@ const Index = () => {
         )}
       </div>
       <div className="w-full lg:w-2/3" id="map-container">
+        <ActivityTypeFilter />
         <RunMap
           title={title}
           viewState={viewState}
