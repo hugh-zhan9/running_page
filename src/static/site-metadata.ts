@@ -9,6 +9,11 @@ interface ISiteMetadataResult {
   }[];
 }
 
+const getBasePath = () => {
+  const baseUrl = import.meta.env.BASE_URL;
+  return baseUrl === '/' ? '' : baseUrl;
+};
+
 const data: ISiteMetadataResult = {
   siteTitle: 'Running Page',
   siteUrl: 'https://hugh-zhan9.github.io/running_page',
@@ -19,6 +24,10 @@ const data: ISiteMetadataResult = {
     //   name: 'Summary',
     //   url: '/summary',
     // },
+    {
+      name: 'Summary',
+      url: `${getBasePath()}/summary`,
+    },
     {
       name: 'Blog',
       url: 'https://hugh-zhan9.github.io',
