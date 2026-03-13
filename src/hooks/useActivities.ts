@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { locationForRun, titleForRun } from '@/utils/utils';
-import activities from '@/static/activities.json';
+import activities from '@/data/activities';
 import { COUNTRY_STANDARDIZATION } from '@/static/city';
 
 const standardizeCountryName = (country: string): string => {

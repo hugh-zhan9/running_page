@@ -30,3 +30,24 @@ Changed Files:
 - `src/utils/map.test.ts`
 - `src/utils/map.ts`
 ----------------------------------------
+## [2026-03-13 14:38] [Bugfix]
+- **Change**: 新增活动展示规则：将指定步行覆盖为清晨跑步、隐藏剩余步行，并放大地图高度与默认开启底图显示
+- **Risk Analysis**: 主要风险在于展示层过滤步行后，年度汇总和总量会显著下降，这是预期但会改变历史统计口径；另外地图默认高度翻倍会影响小屏滚动体验，不过已通过本地页面预览确认主页面可正常展示。
+- **Risk Level**: S2（中级: 局部功能异常、可绕过但影响效率）
+- **Changed Files**:
+- `src/data/activities.ts`
+- `src/hooks/useActivities.ts`
+- `src/components/ActivityList/index.tsx`
+- `src/utils/activity.ts`
+- `src/utils/activity.test.ts`
+- `src/utils/const.ts`
+- `docs/AI_CHANGELOG.md`
+----------------------------------------
+## [2026-03-13 14:42] [Bugfix]
+- **Change**: 将地图高度从双倍恢复为默认尺寸
+- **Risk Analysis**: 风险较低，仅影响页面布局高度；地图加载、轨迹渲染和活动过滤逻辑未改动，但小屏与大屏的可视区域会回到原始水平。
+- **Risk Level**: S3（低级: 轻微行为偏差或日志/可观测性影响）
+- **Changed Files**:
+- `src/utils/const.ts`
+- `docs/AI_CHANGELOG.md`
+----------------------------------------

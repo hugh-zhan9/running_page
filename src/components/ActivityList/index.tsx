@@ -18,7 +18,7 @@ import {
 } from 'recharts';
 import VirtualList from 'rc-virtual-list';
 import { useNavigate } from 'react-router-dom';
-import activities from '@/static/activities.json';
+import activities from '@/data/activities';
 import styles from './style.module.css';
 import { ACTIVITY_TOTAL, LOADING_TEXT } from '@/utils/const';
 import { totalStat, yearSummaryStats } from '@assets/index';
