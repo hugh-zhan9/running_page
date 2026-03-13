@@ -17,6 +17,7 @@ _site/
 
 /.vscode
 .idea
+.worktrees/
 
 config.yaml
 .venv/
